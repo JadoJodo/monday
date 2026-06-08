@@ -1,0 +1,61 @@
+# GoReleaser configuration for monday.
+# Docs: https://goreleaser.com
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: monday
+    main: .
+    binary: monday
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/JadoJodo/monday/cmd.version={{.Version}}
+      - -X github.com/JadoJodo/monday/cmd.commit={{.Commit}}
+
+universal_binaries:
+  - id: monday
+    replace: true
+
+archives:
+  - id: monday
+    formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+homebrew_casks:
+  - name: monday
+    repository:
+      owner: JadoJodo
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: "https://github.com/JadoJodo/monday"
+    description: "Automate routine macOS maintenance from one command"
+    # Strip the macOS quarantine flag so the freshly-downloaded binary runs
+    # without a Gatekeeper prompt.
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/monday"]
+          end
