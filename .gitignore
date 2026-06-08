@@ -1,0 +1,13 @@
+# Binaries
+/monday
+/dist/
+
+# Conductor workspace scratch
+.context/
+
+# Editor / OS
+.DS_Store
+
+# Test artifacts
+*.out
+coverage.txt
