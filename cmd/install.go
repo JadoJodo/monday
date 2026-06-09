@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/JadoJodo/monday/internal/config"
 	"github.com/JadoJodo/monday/internal/exec"
 	"github.com/JadoJodo/monday/internal/launchd"
 	"github.com/JadoJodo/monday/internal/schedule"
@@ -27,6 +28,22 @@ func newInstallCmd(gf *globalFlags) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, _ []string) error {
+			// Require a config before generating an agent: the plist runs
+			// `monday run --force`, which refuses to execute without one. This
+			// also blocks --dry-run, since previewing an always-failing agent
+			// is exactly the bug we are guarding against.
+			path, err := resolvePath(gf)
+			if err != nil {
+				return err
+			}
+			configured, err := config.Exists(path)
+			if err != nil {
+				return err
+			}
+			if !configured {
+				return fmt.Errorf("no configuration found at %s; run `monday config init`", path)
+			}
+
 			cfg, err := loadConfig(gf)
 			if err != nil {
 				return err
@@ -60,7 +77,7 @@ func newInstallCmd(gf *globalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			path, err := launchd.AgentPath(launchd.Label)
+			path, err = launchd.AgentPath(launchd.Label)
 			if err != nil {
 				return err
 			}

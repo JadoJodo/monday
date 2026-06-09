@@ -26,18 +26,19 @@ type globalFlags struct {
 // NewRootCmd builds the root command tree.
 func NewRootCmd() *cobra.Command {
 	gf := &globalFlags{}
-	rf := &runFlags{}
 
 	root := &cobra.Command{
 		Use:   "monday",
 		Short: "Automate routine macOS maintenance",
 		Long: "monday runs your weekly macOS maintenance chores — system updates, " +
 			"Mac App Store updates, npm globals and custom scripts — from one command.\n\n" +
-			"Running `monday` with no subcommand performs a maintenance run.",
+			"Running `monday` with no subcommand shows status and the available " +
+			"modules; it never executes anything. Run `monday run` to perform " +
+			"maintenance.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			return doRun(cmd, gf, rf)
+			return doDefault(cmd, gf)
 		},
 	}
 
@@ -45,7 +46,6 @@ func NewRootCmd() *cobra.Command {
 		"path to config file (default ~/.monday.yaml)")
 	root.PersistentFlags().BoolVarP(&gf.verbose, "verbose", "V", false,
 		"show command output detail")
-	addRunFlags(root.Flags(), rf)
 
 	root.AddCommand(
 		newRunCmd(gf),

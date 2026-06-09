@@ -15,6 +15,9 @@ func run(t *testing.T, args ...string) (string, error) {
 	buf := &bytes.Buffer{}
 	root.SetOut(buf)
 	root.SetErr(buf)
+	// Empty stdin so onboarding never blocks on a prompt if a test runs from a
+	// real terminal; tests exercise the non-interactive branches.
+	root.SetIn(strings.NewReader(""))
 	root.SetArgs(args)
 	err := root.Execute()
 	return buf.String(), err
@@ -87,6 +90,66 @@ func TestConfigPath(t *testing.T) {
 	}
 }
 
+// TestRunUnconfiguredRefuses verifies the key safety fix: `monday run` with no
+// config (non-interactive, as under launchd) refuses with a non-zero exit and
+// writes nothing — so no maintenance can run on an unconfigured machine.
+func TestRunUnconfiguredRefuses(t *testing.T) {
+	cfg := filepath.Join(t.TempDir(), "monday.yaml")
+	out, err := run(t, "--config", cfg, "run", "--force")
+	if err == nil {
+		t.Fatal("run with no config should return an error")
+	}
+	if !strings.Contains(err.Error(), "no configuration found") ||
+		!strings.Contains(err.Error(), "config init") {
+		t.Errorf("error = %q, want guidance toward `config init`", err)
+	}
+	if _, statErr := os.Stat(cfg); !os.IsNotExist(statErr) {
+		t.Errorf("run must not create a config file, but %s exists", cfg)
+	}
+	_ = out
+}
+
+// TestDefaultUnconfiguredShowsModules verifies bare `monday` with no config is
+// informational: it lists modules, points at `config init`, exits 0, and never
+// runs or writes anything.
+func TestDefaultUnconfiguredShowsModules(t *testing.T) {
+	cfg := filepath.Join(t.TempDir(), "monday.yaml")
+	out, err := run(t, "--config", cfg)
+	if err != nil {
+		t.Fatalf("bare monday with no config should exit 0: %v", err)
+	}
+	for _, name := range []string{"softwareupdate", "mas", "npm", "custom"} {
+		if !strings.Contains(out, name) {
+			t.Errorf("output missing module %q in %q", name, out)
+		}
+	}
+	if !strings.Contains(out, "config init") {
+		t.Errorf("output should hint at `config init`: %q", out)
+	}
+	if _, statErr := os.Stat(cfg); !os.IsNotExist(statErr) {
+		t.Errorf("bare monday must not create a config file, but %s exists", cfg)
+	}
+}
+
+// TestDefaultConfiguredShowsStatus verifies bare `monday` with a config shows
+// status and a hint to run maintenance, and never executes tasks.
+func TestDefaultConfiguredShowsStatus(t *testing.T) {
+	cfg := filepath.Join(t.TempDir(), "monday.yaml")
+	if _, err := run(t, "--config", cfg, "config", "init"); err != nil {
+		t.Fatal(err)
+	}
+	out, err := run(t, "--config", cfg)
+	if err != nil {
+		t.Fatalf("bare monday with config: %v", err)
+	}
+	if !strings.Contains(out, "softwareupdate") {
+		t.Errorf("status output missing modules: %q", out)
+	}
+	if !strings.Contains(out, "monday run") {
+		t.Errorf("status output should hint to run maintenance: %q", out)
+	}
+}
+
 func TestInstallDryRun(t *testing.T) {
 	cfg := filepath.Join(t.TempDir(), "monday.yaml")
 	if _, err := run(t, "--config", cfg, "config", "init"); err != nil {
@@ -101,5 +164,22 @@ func TestInstallDryRun(t *testing.T) {
 	}
 	if !strings.Contains(out, "<integer>7</integer>") {
 		t.Errorf("expected hour 7 in plist: %q", out)
+	}
+}
+
+// install must refuse without a config — otherwise it would write a LaunchAgent
+// whose `monday run --force` always fails the missing-config guard. The check
+// also covers --dry-run, so previewing an always-failing agent is impossible.
+func TestInstallRequiresConfig(t *testing.T) {
+	cfg := filepath.Join(t.TempDir(), "monday.yaml") // never created
+	for _, extra := range [][]string{{}, {"--dry-run"}} {
+		args := append([]string{"--config", cfg, "install"}, extra...)
+		out, err := run(t, args...)
+		if err == nil {
+			t.Fatalf("install %v: expected error, got output %q", extra, out)
+		}
+		if !strings.Contains(err.Error(), "no configuration found") {
+			t.Errorf("install %v error = %v", extra, err)
+		}
 	}
 }
