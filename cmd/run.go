@@ -47,6 +47,24 @@ func newRunCmd(gf *globalFlags) *cobra.Command {
 // doRun loads config, runs the selected tasks and prints results. It returns a
 // non-nil error when any task fails so the process exits non-zero.
 func doRun(cmd *cobra.Command, gf *globalFlags, rf *runFlags) error {
+	// Safety gate: never execute maintenance until a config file exists. On an
+	// interactive terminal we offer to create one (but do NOT chain into a run);
+	// otherwise — e.g. the launchd agent — we refuse loudly so nothing runs.
+	path, err := resolvePath(gf)
+	if err != nil {
+		return err
+	}
+	configured, err := config.Exists(path)
+	if err != nil {
+		return err
+	}
+	if !configured {
+		if interactive() {
+			return onboard(cmd, path)
+		}
+		return fmt.Errorf("no configuration found at %s; run `monday config init`", path)
+	}
+
 	cfg, err := loadConfig(gf)
 	if err != nil {
 		return err

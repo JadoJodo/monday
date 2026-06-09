@@ -75,6 +75,19 @@ func DefaultPath() (string, error) {
 	return filepath.Join(home, FileName), nil
 }
 
+// Exists reports whether a config file is present at path. A non-existent file
+// yields (false, nil); any other stat error is returned.
+func Exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if errors.Is(err, fs.ErrNotExist) {
+		return false, nil
+	}
+	return false, err
+}
+
 // Load reads the config at path. A non-existent file is not an error: defaults
 // are returned. Values present in the file override the corresponding defaults;
 // omitted keys keep their default (so a task is only disabled by an explicit

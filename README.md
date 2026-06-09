@@ -22,14 +22,14 @@ go install github.com/JadoJodo/monday@latest
 ## Quick start
 
 ```sh
-monday config init      # write a sample ~/.monday.yaml
-monday list             # show tasks and their enabled state
+monday config init      # write a sample ~/.monday.yaml (required before running)
+monday                  # show tasks and their enabled state
+monday run              # run maintenance if today is the scheduled day
 monday run --dry-run    # preview what would happen, changing nothing
-monday                  # run maintenance (applies updates) if today is the scheduled day
 monday run --force      # run now regardless of the schedule
 ```
 
-By default `monday` **applies** updates. Use `--dry-run` to preview first.
+By default `monday run` **applies** updates. Use `--dry-run` to preview first.
 
 ## Tasks
 
@@ -64,8 +64,9 @@ tasks:
         run: brew upgrade
 ```
 
-A missing config file is fine — every task is enabled and the schedule defaults
-to Monday. A task is only disabled by an explicit `enabled: false`.
+`monday` needs a config file before it will run maintenance — create one with
+`monday config init`. Once it exists, every task is enabled by default and the
+schedule defaults to Monday; a task is only disabled by an explicit `enabled: false`.
 
 Useful flags:
 
@@ -77,7 +78,8 @@ Useful flags:
 
 ## Automatic scheduling (launchd)
 
-Install a per-user LaunchAgent that runs `monday` on the configured weekday:
+Install a per-user LaunchAgent that runs `monday run` on the configured weekday
+(run `monday config init` first — `install` refuses without a config):
 
 ```sh
 monday install --dry-run            # preview the generated plist

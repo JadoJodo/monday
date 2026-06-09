@@ -29,6 +29,22 @@ func TestLoadMissingFileReturnsDefaults(t *testing.T) {
 	}
 }
 
+func TestExists(t *testing.T) {
+	dir := t.TempDir()
+	missing := filepath.Join(dir, "missing.yaml")
+	if ok, err := Exists(missing); err != nil || ok {
+		t.Errorf("Exists(missing) = (%v, %v), want (false, nil)", ok, err)
+	}
+
+	present := filepath.Join(dir, "present.yaml")
+	if err := os.WriteFile(present, Sample(), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if ok, err := Exists(present); err != nil || !ok {
+		t.Errorf("Exists(present) = (%v, %v), want (true, nil)", ok, err)
+	}
+}
+
 func TestLoadOverridesAndPreservesDefaults(t *testing.T) {
 	yaml := `
 schedule:
