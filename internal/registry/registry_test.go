@@ -4,7 +4,10 @@ import "testing"
 
 func TestDefaultOrderAndLookup(t *testing.T) {
 	r := Default()
-	want := []string{"softwareupdate", "mas", "npm", "custom"}
+	want := []string{
+		"softwareupdate", "mas", "brew", "npm", "pipx", "rustup", "mise",
+		"custom", "cleanup", "health",
+	}
 	got := r.Names()
 	if len(got) != len(want) {
 		t.Fatalf("names = %v, want %v", got, want)

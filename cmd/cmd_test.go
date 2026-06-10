@@ -39,7 +39,7 @@ func TestListCommand(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"softwareupdate", "mas", "npm", "custom"} {
+	for _, name := range []string{"softwareupdate", "mas", "brew", "npm", "pipx", "rustup", "mise", "custom", "cleanup", "health"} {
 		if !strings.Contains(out, name) {
 			t.Errorf("list missing task %q in %q", name, out)
 		}
@@ -74,7 +74,7 @@ func TestConfigInitAndShow(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(show, "schedule") || !strings.Contains(show, "monday") {
+	if !strings.Contains(show, "profiles") || !strings.Contains(show, "weekly") {
 		t.Errorf("show output = %q", show)
 	}
 }
@@ -118,7 +118,7 @@ func TestDefaultUnconfiguredShowsModules(t *testing.T) {
 	if err != nil {
 		t.Fatalf("bare monday with no config should exit 0: %v", err)
 	}
-	for _, name := range []string{"softwareupdate", "mas", "npm", "custom"} {
+	for _, name := range []string{"softwareupdate", "mas", "brew", "npm", "pipx", "rustup", "mise", "custom", "cleanup", "health"} {
 		if !strings.Contains(out, name) {
 			t.Errorf("output missing module %q in %q", name, out)
 		}
@@ -147,6 +147,32 @@ func TestDefaultConfiguredShowsStatus(t *testing.T) {
 	}
 	if !strings.Contains(out, "monday run") {
 		t.Errorf("status output should hint to run maintenance: %q", out)
+	}
+}
+
+// install must reject a config that exists but does not parse under the current
+// schema (a legacy `schedule:` file or malformed YAML) — otherwise it writes a
+// LaunchAgent whose `monday run` fails on every fire. The check covers --dry-run
+// too, so previewing an always-failing agent is impossible.
+func TestInstallRejectsUnparseableConfig(t *testing.T) {
+	cases := map[string]string{
+		"legacy schedule schema": "schedule:\n  days: [monday]\n",
+		"malformed yaml":         "profiles: [this is: not valid\n",
+	}
+	for name, contents := range cases {
+		t.Run(name, func(t *testing.T) {
+			cfg := filepath.Join(t.TempDir(), "monday.yaml")
+			if err := os.WriteFile(cfg, []byte(contents), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			for _, extra := range [][]string{{}, {"--dry-run"}} {
+				args := append([]string{"--config", cfg, "install"}, extra...)
+				out, err := run(t, args...)
+				if err == nil {
+					t.Fatalf("install %v: expected error for %s, got output %q", extra, name, out)
+				}
+			}
+		})
 	}
 }
 

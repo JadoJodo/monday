@@ -7,18 +7,18 @@ import (
 	"os"
 	"path/filepath"
 	"text/template"
-	"time"
 )
 
 // Label is the launchd job label used for the monday agent.
 const Label = "io.monday.agent"
 
-// PlistConfig describes the LaunchAgent to generate.
+// PlistConfig describes the LaunchAgent to generate. The agent fires daily at
+// Hour:Minute; monday itself decides which profiles are due, so the plist never
+// desyncs from the config and launchd coalesces runs missed while asleep.
 type PlistConfig struct {
 	Label      string
 	Program    string   // absolute path to the monday binary
-	Args       []string // arguments passed to Program (e.g. ["run", "--force"])
-	Weekday    time.Weekday
+	Args       []string // arguments passed to Program (e.g. ["run"])
 	Hour       int
 	Minute     int
 	StdoutPath string
@@ -40,8 +40,6 @@ var plistTmpl = template.Must(template.New("plist").Parse(`<?xml version="1.0" e
 	</array>
 	<key>StartCalendarInterval</key>
 	<dict>
-		<key>Weekday</key>
-		<integer>{{.WeekdayInt}}</integer>
 		<key>Hour</key>
 		<integer>{{.Hour}}</integer>
 		<key>Minute</key>
@@ -55,19 +53,13 @@ var plistTmpl = template.Must(template.New("plist").Parse(`<?xml version="1.0" e
 </plist>
 `))
 
-// templateData mirrors PlistConfig but exposes the weekday as an integer.
-type templateData struct {
-	PlistConfig
-	WeekdayInt int
-}
-
 // Plist renders the LaunchAgent XML for c.
 func Plist(c PlistConfig) (string, error) {
 	if c.Label == "" {
 		c.Label = Label
 	}
 	var buf bytes.Buffer
-	if err := plistTmpl.Execute(&buf, templateData{PlistConfig: c, WeekdayInt: int(c.Weekday)}); err != nil {
+	if err := plistTmpl.Execute(&buf, c); err != nil {
 		return "", err
 	}
 	return buf.String(), nil

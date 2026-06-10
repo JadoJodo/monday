@@ -39,8 +39,7 @@ func doDefault(cmd *cobra.Command, gf *globalFlags) error {
 	}
 	out := cmd.OutOrStdout()
 	fmt.Fprintln(out, ui.List(registry.Default(), cfg))
-	fmt.Fprintf(out, "\nScheduled for %s. Run `monday run` to perform maintenance.\n",
-		cfg.Schedule.Day)
+	fmt.Fprintln(out, "\nRun `monday run` to perform maintenance.")
 	return nil
 }
 

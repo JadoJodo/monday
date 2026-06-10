@@ -102,6 +102,27 @@ func TestRunSelectedFailure(t *testing.T) {
 	}
 }
 
+// TestRunAllRunsEnabledTaskNotInAnyProfile covers the run_all path
+// (runSelected with no task list): an enabled task that no profile references
+// must still run, since run_all means "every enabled task".
+func TestRunAllRunsEnabledTaskNotInAnyProfile(t *testing.T) {
+	// Config whose only profile lists a different task, so "x" is omitted.
+	path := filepath.Join(t.TempDir(), "monday.yaml")
+	cfgYAML := "profiles:\n  weekly:\n    days: [monday]\n    tasks: [other]\n"
+	if err := os.WriteFile(path, []byte(cfgYAML), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	reg := regWith(fakeTask{name: "x", enabled: true})
+	res := runSelected(context.Background(), reg, path, nil, false)
+	if res.IsError {
+		t.Errorf("run_all should succeed: %s", res.Content[0].(*mcp.TextContent).Text)
+	}
+	text := res.Content[0].(*mcp.TextContent).Text
+	if !strings.Contains(text, "x: ok") {
+		t.Errorf("enabled task x not referenced by any profile should still run via run_all: %s", text)
+	}
+}
+
 func TestRunSelectedUnknownTask(t *testing.T) {
 	reg := regWith(fakeTask{name: "x", enabled: true})
 	res := runSelected(context.Background(), reg, tempConfig(t), []string{"nope"}, false)

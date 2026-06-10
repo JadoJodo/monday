@@ -72,12 +72,14 @@ func runSelected(ctx context.Context, reg *registry.Registry, cfgPath string, on
 	if err != nil {
 		return errorResult(err)
 	}
-	sum, err := runner.Run(ctx, reg, cfg, runner.Options{
-		DryRun:    dryRun,
-		Only:      only,
-		Force:     true, // an explicit agent call always runs
-		Commander: exec.System{},
-	})
+	opts := runner.Options{DryRun: dryRun, Commander: exec.System{}}
+	if len(only) > 0 {
+		opts.Only = only
+		opts.Force = true // an explicit single-task agent call runs regardless of schedule
+	} else {
+		opts.AllEnabled = true // run_all: every enabled task, ignoring profiles/schedule
+	}
+	sum, err := runner.Run(ctx, reg, cfg, opts)
 	if err != nil {
 		return errorResult(err)
 	}
