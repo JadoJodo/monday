@@ -9,6 +9,7 @@ import (
 
 	"github.com/JadoJodo/monday/internal/config"
 	"github.com/JadoJodo/monday/internal/exec"
+	"github.com/JadoJodo/monday/internal/notify"
 	"github.com/JadoJodo/monday/internal/registry"
 	"github.com/JadoJodo/monday/internal/runner"
 	"github.com/JadoJodo/monday/internal/ui"
@@ -16,17 +17,19 @@ import (
 
 // runFlags holds the options for a maintenance run.
 type runFlags struct {
-	dryRun bool
-	force  bool
-	day    string
-	only   []string
+	dryRun   bool
+	force    bool
+	day      string
+	only     []string
+	profiles []string
 }
 
 func addRunFlags(fs *pflag.FlagSet, f *runFlags) {
 	fs.BoolVar(&f.dryRun, "dry-run", false, "preview actions without making changes")
-	fs.BoolVar(&f.force, "force", false, "run regardless of the configured weekday")
-	fs.StringVar(&f.day, "day", "", "override the configured weekday (e.g. friday)")
+	fs.BoolVar(&f.force, "force", false, "run every profile regardless of the day")
+	fs.StringVar(&f.day, "day", "", "pretend today is this weekday (e.g. friday)")
 	fs.StringSliceVar(&f.only, "only", nil, "run only these tasks (comma-separated)")
+	fs.StringSliceVar(&f.profiles, "profile", nil, "run only these profiles, regardless of the day")
 }
 
 func newRunCmd(gf *globalFlags) *cobra.Command {
@@ -74,11 +77,12 @@ func doRun(cmd *cobra.Command, gf *globalFlags, rf *runFlags) error {
 	force := rf.force || len(rf.only) > 0
 
 	sum, err := runner.Run(cmd.Context(), registry.Default(), cfg, runner.Options{
-		DryRun:      rf.dryRun,
-		Only:        rf.only,
-		Force:       force,
-		DayOverride: rf.day,
-		Commander:   exec.System{},
+		DryRun:    rf.dryRun,
+		Only:      rf.only,
+		Force:     force,
+		Day:       rf.day,
+		Profiles:  rf.profiles,
+		Commander: exec.System{},
 	})
 	if err != nil {
 		return err
@@ -88,6 +92,15 @@ func doRun(cmd *cobra.Command, gf *globalFlags, rf *runFlags) error {
 	fmt.Fprintln(out, ui.Decision(sum.Decision))
 	if len(sum.Results) > 0 {
 		fmt.Fprintln(out, ui.Results(sum.Results, gf.verbose))
+	}
+
+	// Notify headlessly so launchd-triggered runs are visible. Dry-run and
+	// not-due runs never notify; notifier failures are warnings only.
+	if !rf.dryRun && sum.Decision.Due && notify.ShouldNotify(cfg, sum.Failed()) {
+		msg := notify.FromSummary(sum)
+		for _, e := range notify.Dispatch(cmd.Context(), cfg, msg, notify.Default(exec.System{})...) {
+			fmt.Fprintln(cmd.ErrOrStderr(), "notify:", e)
+		}
 	}
 
 	if sum.Failed() {

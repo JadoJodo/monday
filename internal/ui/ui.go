@@ -34,9 +34,33 @@ func Decision(d schedule.Decision) string {
 	return mutedStyle.Render(fmt.Sprintf("· skipped: %s (use --force to run now)", d.Reason))
 }
 
-// List renders the available tasks and whether each is enabled for cfg.
+// List renders the configured profiles and the available tasks (with each
+// task's enabled state) for cfg. Tasks named by a profile but disabled in
+// config are marked so the discrepancy is visible.
 func List(reg *registry.Registry, cfg config.Config) string {
 	var b strings.Builder
+
+	b.WriteString(titleStyle.Render("Profiles") + "\n")
+	if len(cfg.Profiles) == 0 {
+		b.WriteString("  " + mutedStyle.Render("(none configured)") + "\n")
+	}
+	for _, name := range cfg.ProfileNames() {
+		p := cfg.Profiles[name]
+		b.WriteString(fmt.Sprintf("  %s %s\n",
+			titleStyle.Render(name),
+			mutedStyle.Render("· "+strings.Join(p.Days, ", "))))
+		labels := make([]string, 0, len(p.Tasks))
+		for _, tn := range p.Tasks {
+			if t, ok := reg.Get(tn); ok && !t.Enabled(cfg) {
+				labels = append(labels, mutedStyle.Render(tn+" (disabled)"))
+			} else {
+				labels = append(labels, tn)
+			}
+		}
+		b.WriteString("    " + mutedStyle.Render("tasks: ") + strings.Join(labels, ", ") + "\n")
+	}
+	b.WriteString("\n")
+
 	b.WriteString(titleStyle.Render("Tasks") + "\n")
 	for _, t := range reg.All() {
 		state := disabledLbl

@@ -4,14 +4,12 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestPlistContainsKeyFields(t *testing.T) {
 	xml, err := Plist(PlistConfig{
 		Program:    "/usr/local/bin/monday",
-		Args:       []string{"run", "--force"},
-		Weekday:    time.Monday,
+		Args:       []string{"run"},
 		Hour:       9,
 		Minute:     30,
 		StdoutPath: "/tmp/monday.log",
@@ -24,10 +22,8 @@ func TestPlistContainsKeyFields(t *testing.T) {
 		"<string>io.monday.agent</string>",
 		"<string>/usr/local/bin/monday</string>",
 		"<string>run</string>",
-		"<string>--force</string>",
-		"<key>Weekday</key>\n\t\t<integer>1</integer>", // Monday == 1
-		"<integer>9</integer>",
-		"<integer>30</integer>",
+		"<key>Hour</key>\n\t\t<integer>9</integer>",
+		"<key>Minute</key>\n\t\t<integer>30</integer>",
 		"/tmp/monday.log",
 	} {
 		if !strings.Contains(xml, want) {
@@ -36,10 +32,15 @@ func TestPlistContainsKeyFields(t *testing.T) {
 	}
 }
 
-func TestPlistWeekdayInteger(t *testing.T) {
-	xml, _ := Plist(PlistConfig{Program: "/x", Weekday: time.Sunday})
-	if !strings.Contains(xml, "<key>Weekday</key>\n\t\t<integer>0</integer>") {
-		t.Errorf("Sunday should map to 0:\n%s", xml)
+func TestPlistIsDailyNoWeekday(t *testing.T) {
+	// The agent fires daily; monday decides which profiles are due, so the plist
+	// must NOT pin a weekday and must NOT pass --force.
+	xml, _ := Plist(PlistConfig{Program: "/x", Args: []string{"run"}, Hour: 8})
+	if strings.Contains(xml, "Weekday") {
+		t.Errorf("daily plist should not contain Weekday:\n%s", xml)
+	}
+	if strings.Contains(xml, "--force") {
+		t.Errorf("daily plist should not pass --force:\n%s", xml)
 	}
 }
 
