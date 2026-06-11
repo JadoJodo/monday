@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/exec"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/exec"
 )
 
 // Step is a single command invocation within a multi-step task. All steps in a

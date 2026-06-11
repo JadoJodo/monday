@@ -8,8 +8,8 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/spf13/cobra"
 
-	"github.com/JadoJodo/monday/internal/mcpserver"
-	"github.com/JadoJodo/monday/internal/registry"
+	"github.com/JadoJodo/rundown/internal/mcpserver"
+	"github.com/JadoJodo/rundown/internal/registry"
 )
 
 func newMCPCmd(gf *globalFlags) *cobra.Command {
@@ -18,7 +18,7 @@ func newMCPCmd(gf *globalFlags) *cobra.Command {
 		Short: "Start the MCP server (stdio) for AI agents",
 		Long: "Starts a Model Context Protocol server over stdio, exposing each " +
 			"maintenance task as a tool. Configure it in your MCP client as the " +
-			"command `monday mcp`.",
+			"command `rundown mcp`.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, _ []string) error {

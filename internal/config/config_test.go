@@ -87,7 +87,7 @@ notify:
   ntfy:
     enabled: true
 `
-	path := filepath.Join(t.TempDir(), "monday.yaml")
+	path := filepath.Join(t.TempDir(), "rundown.yaml")
 	if err := os.WriteFile(path, []byte(yaml), 0o644); err != nil {
 		t.Fatal(err)
 	}

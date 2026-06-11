@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JadoJodo/monday/internal/config"
+	"github.com/JadoJodo/rundown/internal/config"
 )
 
 func TestParseWeekday(t *testing.T) {

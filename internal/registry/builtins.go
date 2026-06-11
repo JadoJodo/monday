@@ -1,16 +1,16 @@
 package registry
 
 import (
-	"github.com/JadoJodo/monday/internal/tasks/brew"
-	"github.com/JadoJodo/monday/internal/tasks/cleanup"
-	"github.com/JadoJodo/monday/internal/tasks/custom"
-	"github.com/JadoJodo/monday/internal/tasks/health"
-	"github.com/JadoJodo/monday/internal/tasks/mas"
-	"github.com/JadoJodo/monday/internal/tasks/mise"
-	"github.com/JadoJodo/monday/internal/tasks/npm"
-	"github.com/JadoJodo/monday/internal/tasks/pipx"
-	"github.com/JadoJodo/monday/internal/tasks/rustup"
-	"github.com/JadoJodo/monday/internal/tasks/softwareupdate"
+	"github.com/JadoJodo/rundown/internal/tasks/brew"
+	"github.com/JadoJodo/rundown/internal/tasks/cleanup"
+	"github.com/JadoJodo/rundown/internal/tasks/custom"
+	"github.com/JadoJodo/rundown/internal/tasks/health"
+	"github.com/JadoJodo/rundown/internal/tasks/mas"
+	"github.com/JadoJodo/rundown/internal/tasks/mise"
+	"github.com/JadoJodo/rundown/internal/tasks/npm"
+	"github.com/JadoJodo/rundown/internal/tasks/pipx"
+	"github.com/JadoJodo/rundown/internal/tasks/rustup"
+	"github.com/JadoJodo/rundown/internal/tasks/softwareupdate"
 )
 
 // Default returns a Registry populated with the built-in tasks in their

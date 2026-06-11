@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/JadoJodo/monday/internal/config"
+	"github.com/JadoJodo/rundown/internal/config"
 )
 
 type ntfy struct{ client *http.Client }

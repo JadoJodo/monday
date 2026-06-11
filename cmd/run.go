@@ -7,12 +7,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/exec"
-	"github.com/JadoJodo/monday/internal/notify"
-	"github.com/JadoJodo/monday/internal/registry"
-	"github.com/JadoJodo/monday/internal/runner"
-	"github.com/JadoJodo/monday/internal/ui"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/exec"
+	"github.com/JadoJodo/rundown/internal/notify"
+	"github.com/JadoJodo/rundown/internal/registry"
+	"github.com/JadoJodo/rundown/internal/runner"
+	"github.com/JadoJodo/rundown/internal/ui"
 )
 
 // runFlags holds the options for a maintenance run.
@@ -65,7 +65,10 @@ func doRun(cmd *cobra.Command, gf *globalFlags, rf *runFlags) error {
 		if interactive() {
 			return onboard(cmd, path)
 		}
-		return fmt.Errorf("no configuration found at %s; run `monday config init`", path)
+		if legacy, ok := legacyConfigPath(path); ok {
+			return fmt.Errorf("no configuration found at %s; found legacy %s — rename it to %s", path, legacy, path)
+		}
+		return fmt.Errorf("no configuration found at %s; run `rundown config init`", path)
 	}
 
 	cfg, err := loadConfig(gf)

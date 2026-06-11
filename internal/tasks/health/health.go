@@ -7,9 +7,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/exec"
-	"github.com/JadoJodo/monday/internal/task"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/exec"
+	"github.com/JadoJodo/rundown/internal/task"
 )
 
 type healthTask struct{}

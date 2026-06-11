@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JadoJodo/monday/internal/config"
+	"github.com/JadoJodo/rundown/internal/config"
 )
 
 var weekdays = map[string]time.Weekday{
@@ -62,7 +62,7 @@ type Query struct {
 	Profiles []string
 }
 
-// Evaluate reports which profiles monday should run.
+// Evaluate reports which profiles rundown should run.
 //
 //   - --profile names run those profiles regardless of the day (unknown name is
 //     an error).

@@ -3,8 +3,8 @@
 package softwareupdate
 
 import (
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/task"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/task"
 )
 
 // New returns the softwareupdate task. Dry-run lists available updates

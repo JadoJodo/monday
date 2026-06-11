@@ -1,4 +1,4 @@
-// Package launchd generates a LaunchAgent property list so monday can run
+// Package launchd generates a LaunchAgent property list so rundown can run
 // automatically on a schedule via macOS launchd.
 package launchd
 
@@ -9,15 +9,20 @@ import (
 	"text/template"
 )
 
-// Label is the launchd job label used for the monday agent.
-const Label = "io.monday.agent"
+// Label is the launchd job label used for the rundown agent.
+const Label = "io.rundown.agent"
+
+// LegacyLabel is the launchd job label used by the tool's previous name
+// (monday). `install` cleans up an agent left under this label so it does not
+// keep firing a binary removed by the rename.
+const LegacyLabel = "io.monday.agent"
 
 // PlistConfig describes the LaunchAgent to generate. The agent fires daily at
-// Hour:Minute; monday itself decides which profiles are due, so the plist never
+// Hour:Minute; rundown itself decides which profiles are due, so the plist never
 // desyncs from the config and launchd coalesces runs missed while asleep.
 type PlistConfig struct {
 	Label      string
-	Program    string   // absolute path to the monday binary
+	Program    string   // absolute path to the rundown binary
 	Args       []string // arguments passed to Program (e.g. ["run"])
 	Hour       int
 	Minute     int

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/exec"
-	"github.com/JadoJodo/monday/internal/task"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/exec"
+	"github.com/JadoJodo/rundown/internal/task"
 )
 
 func TestNpmMetadata(t *testing.T) {

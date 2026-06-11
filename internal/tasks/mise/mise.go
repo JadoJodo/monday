@@ -2,8 +2,8 @@
 package mise
 
 import (
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/task"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/task"
 )
 
 // New returns the mise task. Dry-run lists outdated tools (`mise outdated`,

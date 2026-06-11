@@ -1,4 +1,4 @@
-// Package cmd implements monday's command-line interface using Cobra, wrapped
+// Package cmd implements rundown's command-line interface using Cobra, wrapped
 // by Fang for styled help, errors, version handling and completions.
 package cmd
 
@@ -11,7 +11,7 @@ import (
 )
 
 // Build information, overridable at link time via -ldflags
-// "-X github.com/JadoJodo/monday/cmd.version=... -X ...commit=...".
+// "-X github.com/JadoJodo/rundown/cmd.version=... -X ...commit=...".
 var (
 	version = "dev"
 	commit  = "none"
@@ -28,12 +28,12 @@ func NewRootCmd() *cobra.Command {
 	gf := &globalFlags{}
 
 	root := &cobra.Command{
-		Use:   "monday",
+		Use:   "rundown",
 		Short: "Automate routine macOS maintenance",
-		Long: "monday runs your weekly macOS maintenance chores — system updates, " +
+		Long: "rundown runs your weekly macOS maintenance chores — system updates, " +
 			"Mac App Store updates, npm globals and custom scripts — from one command.\n\n" +
-			"Running `monday` with no subcommand shows status and the available " +
-			"modules; it never executes anything. Run `monday run` to perform " +
+			"Running `rundown` with no subcommand shows status and the available " +
+			"modules; it never executes anything. Run `rundown run` to perform " +
 			"maintenance.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
@@ -43,7 +43,7 @@ func NewRootCmd() *cobra.Command {
 	}
 
 	root.PersistentFlags().StringVar(&gf.configPath, "config", "",
-		"path to config file (default ~/.monday.yaml)")
+		"path to config file (default ~/.rundown.yaml)")
 	root.PersistentFlags().BoolVarP(&gf.verbose, "verbose", "V", false,
 		"show command output detail")
 

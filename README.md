@@ -1,6 +1,6 @@
-# monday
+# rundown
 
-Automate routine macOS maintenance from one command. `monday` runs your
+Automate routine macOS maintenance from one command. `rundown` runs your
 chores — system software updates, Mac App Store updates, Homebrew/npm/pipx/Rust/mise
 package upgrades, your own custom scripts, plus read-only disk-cleanup and
 health reports — on a schedule, with a single CLI. Tasks are bundled into named
@@ -13,26 +13,26 @@ AI agents over MCP. Runs report their outcome via macOS notifications and/or
 Via Homebrew:
 
 ```sh
-brew install JadoJodo/tap/monday
+brew install JadoJodo/tap/rundown
 ```
 
 Or build from source (Go 1.26+):
 
 ```sh
-go install github.com/JadoJodo/monday@latest
+go install github.com/JadoJodo/rundown@latest
 ```
 
 ## Quick start
 
 ```sh
-monday config init      # write a sample ~/.monday.yaml (required before running)
-monday                  # show profiles, tasks and their enabled state
-monday run              # run any profiles due today
-monday run --dry-run    # preview what would happen, changing nothing
-monday run --force      # run every profile now, regardless of the day
+rundown config init      # write a sample ~/.rundown.yaml (required before running)
+rundown                  # show profiles, tasks and their enabled state
+rundown run              # run any profiles due today
+rundown run --dry-run    # preview what would happen, changing nothing
+rundown run --force      # run every profile now, regardless of the day
 ```
 
-By default `monday run` **applies** updates. Use `--dry-run` to preview first.
+By default `rundown run` **applies** updates. Use `--dry-run` to preview first.
 
 ## Tasks
 
@@ -55,8 +55,8 @@ not failed. `cleanup` and `health` are **report-only**: they run regardless of
 
 ## Configuration
 
-`monday config init` writes `~/.monday.yaml`. **Profiles** bundle tasks onto
-weekdays; `monday` decides which profiles are due each day.
+`rundown config init` writes `~/.rundown.yaml`. **Profiles** bundle tasks onto
+weekdays; `rundown` decides which profiles are due each day.
 
 ```yaml
 profiles:
@@ -87,18 +87,18 @@ notify:
   ntfy:
     enabled: false
     server: https://ntfy.sh
-    topic: my-monday
+    topic: my-rundown
     priority: default      # min|low|default|high|urgent (bumped to high on failure)
 ```
 
-`monday` needs a config file before it will run maintenance — create one with
-`monday config init`. Every task is enabled by default; a task is only disabled
+`rundown` needs a config file before it will run maintenance — create one with
+`rundown config init`. Every task is enabled by default; a task is only disabled
 by an explicit `enabled: false`. A user-defined `profiles:` block fully replaces
 the default `weekly` profile.
 
 > **Upgrading from the old `schedule:` schema?** There is no automatic
-> migration. `monday` rejects an old-schema config with a clear error; run
-> `monday config init` (your file is preserved until you overwrite it).
+> migration. `rundown` rejects an old-schema config with a clear error; run
+> `rundown config init` (your file is preserved until you overwrite it).
 
 Useful flags:
 
@@ -112,7 +112,7 @@ Useful flags:
 
 ## Notifications
 
-After a run, `monday` reports the outcome so launchd-triggered runs are visible:
+After a run, `rundown` reports the outcome so launchd-triggered runs are visible:
 
 - **macOS notification** (on by default) — a native banner with the run summary.
 - **ntfy** (off by default) — a POST to `{server}/{topic}`; works with the public
@@ -124,28 +124,28 @@ not-due runs never notify.
 
 ## Automatic scheduling (launchd)
 
-Install a per-user LaunchAgent that runs `monday run` **daily** (run
-`monday config init` first — `install` refuses without a config):
+Install a per-user LaunchAgent that runs `rundown run` **daily** (run
+`rundown config init` first — `install` refuses without a config):
 
 ```sh
-monday install --dry-run            # preview the generated plist
-monday install --hour 9 --minute 0  # install it (runs daily at 09:00)
-monday uninstall                    # remove it
+rundown install --dry-run            # preview the generated plist
+rundown install --hour 9 --minute 0  # install it (runs daily at 09:00)
+rundown uninstall                    # remove it
 ```
 
-The agent fires every day and lets `monday` decide which profiles are due, so
+The agent fires every day and lets `rundown` decide which profiles are due, so
 the plist never desyncs from your config — change a profile's `days` and the
 agent keeps working without reinstalling. (launchd also coalesces runs missed
 while the Mac was asleep.) The agent is written to
-`~/Library/LaunchAgents/io.monday.agent.plist` and logs to
-`~/Library/Logs/monday.log`.
+`~/Library/LaunchAgents/io.rundown.agent.plist` and logs to
+`~/Library/Logs/rundown.log`.
 
 ## MCP server (AI integration)
 
-`monday` ships an MCP server so AI agents can run maintenance for you:
+`rundown` ships an MCP server so AI agents can run maintenance for you:
 
 ```sh
-monday mcp     # speaks MCP over stdio
+rundown mcp     # speaks MCP over stdio
 ```
 
 It exposes one `run_<task>` tool per task, a `run_all` tool, and `list_tasks`,
@@ -155,7 +155,7 @@ all generated from the same task registry the CLI uses. Each tool accepts a
 ```json
 {
   "mcpServers": {
-    "monday": { "command": "monday", "args": ["mcp"] }
+    "rundown": { "command": "rundown", "args": ["mcp"] }
   }
 }
 ```
@@ -163,7 +163,7 @@ all generated from the same task registry the CLI uses. Each tool accepts a
 Inspect it locally with the MCP Inspector:
 
 ```sh
-npx @modelcontextprotocol/inspector monday mcp
+npx @modelcontextprotocol/inspector rundown mcp
 ```
 
 ## Architecture

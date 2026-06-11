@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/exec"
-	"github.com/JadoJodo/monday/internal/runner"
-	"github.com/JadoJodo/monday/internal/task"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/exec"
+	"github.com/JadoJodo/rundown/internal/runner"
+	"github.com/JadoJodo/rundown/internal/task"
 )
 
 func TestShouldNotify(t *testing.T) {
@@ -42,8 +42,8 @@ func TestFromSummary(t *testing.T) {
 		{Name: "brew", Summary: "completed"},
 		{Name: "npm", Summary: "checked"},
 	}})
-	if ok.Title != "monday: 2 ok" {
-		t.Errorf("title = %q, want 'monday: 2 ok'", ok.Title)
+	if ok.Title != "rundown: 2 ok" {
+		t.Errorf("title = %q, want 'rundown: 2 ok'", ok.Title)
 	}
 	if ok.Failed {
 		t.Error("clean run should not be Failed")
@@ -56,8 +56,8 @@ func TestFromSummary(t *testing.T) {
 		{Name: "brew", Summary: "completed"},
 		{Name: "npm", Err: errors.New("npm boom")},
 	}})
-	if failed.Title != "monday: 1 failed" {
-		t.Errorf("title = %q, want 'monday: 1 failed'", failed.Title)
+	if failed.Title != "rundown: 1 failed" {
+		t.Errorf("title = %q, want 'rundown: 1 failed'", failed.Title)
 	}
 	if !failed.Failed {
 		t.Error("run with an error should be Failed")
@@ -71,7 +71,7 @@ func TestMacOSUsesArgvForm(t *testing.T) {
 	fake := exec.NewFake()
 	cfg := config.Default()
 	// Title/body carry AppleScript metacharacters that must NOT be interpolated.
-	msg := Message{Title: `monday: 1 failed`, Body: `npm — "boom" \ done`}
+	msg := Message{Title: `rundown: 1 failed`, Body: `npm — "boom" \ done`}
 	if err := MacOS(fake).Send(context.Background(), cfg, msg); err != nil {
 		t.Fatalf("Send: %v", err)
 	}
@@ -124,7 +124,7 @@ func TestNtfyPostsTitleBodyPriority(t *testing.T) {
 	cfg.Notify.Ntfy.Topic = "my-topic"
 	cfg.Notify.Ntfy.Priority = "default"
 
-	msg := Message{Title: "monday: 1 failed", Body: "npm — boom", Failed: true}
+	msg := Message{Title: "rundown: 1 failed", Body: "npm — boom", Failed: true}
 	if err := Ntfy().Send(context.Background(), cfg, msg); err != nil {
 		t.Fatalf("Send: %v", err)
 	}

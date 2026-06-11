@@ -10,9 +10,9 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/registry"
-	"github.com/JadoJodo/monday/internal/task"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/registry"
+	"github.com/JadoJodo/rundown/internal/task"
 )
 
 type fakeTask struct {
@@ -38,7 +38,7 @@ func regWith(tasks ...task.Task) *registry.Registry {
 
 func tempConfig(t *testing.T) string {
 	t.Helper()
-	path := filepath.Join(t.TempDir(), "monday.yaml")
+	path := filepath.Join(t.TempDir(), "rundown.yaml")
 	if err := os.WriteFile(path, config.Sample(), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +107,7 @@ func TestRunSelectedFailure(t *testing.T) {
 // must still run, since run_all means "every enabled task".
 func TestRunAllRunsEnabledTaskNotInAnyProfile(t *testing.T) {
 	// Config whose only profile lists a different task, so "x" is omitted.
-	path := filepath.Join(t.TempDir(), "monday.yaml")
+	path := filepath.Join(t.TempDir(), "rundown.yaml")
 	cfgYAML := "profiles:\n  weekly:\n    days: [monday]\n    tasks: [other]\n"
 	if err := os.WriteFile(path, []byte(cfgYAML), 0o644); err != nil {
 		t.Fatal(err)
