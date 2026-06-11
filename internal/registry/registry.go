@@ -2,7 +2,7 @@
 // the single source of truth shared by the CLI runner and the MCP server.
 package registry
 
-import "github.com/JadoJodo/monday/internal/task"
+import "github.com/JadoJodo/rundown/internal/task"
 
 // Registry stores registered tasks and preserves registration order.
 type Registry struct {

@@ -1,4 +1,4 @@
-// Package mcpserver exposes monday's maintenance tasks to AI agents over the
+// Package mcpserver exposes rundown's maintenance tasks to AI agents over the
 // Model Context Protocol. Tools are generated from the same task registry the
 // CLI uses, so there is a single source of truth.
 package mcpserver
@@ -10,11 +10,11 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/exec"
-	"github.com/JadoJodo/monday/internal/registry"
-	"github.com/JadoJodo/monday/internal/runner"
-	"github.com/JadoJodo/monday/internal/task"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/exec"
+	"github.com/JadoJodo/rundown/internal/registry"
+	"github.com/JadoJodo/rundown/internal/runner"
+	"github.com/JadoJodo/rundown/internal/task"
 )
 
 // RunArgs is the input schema shared by the run tools.
@@ -24,10 +24,10 @@ type RunArgs struct {
 
 // New builds an MCP server exposing one run tool per task, a run_all tool, and
 // a list_tasks tool. cfgPath is the config file to load on each call ("" uses
-// the default ~/.monday.yaml). Tasks invoked via MCP always run regardless of
+// the default ~/.rundown.yaml). Tasks invoked via MCP always run regardless of
 // the weekday schedule (the agent's call is the trigger).
 func New(version string, reg *registry.Registry, cfgPath string) *mcp.Server {
-	s := mcp.NewServer(&mcp.Implementation{Name: "monday", Version: version}, nil)
+	s := mcp.NewServer(&mcp.Implementation{Name: "rundown", Version: version}, nil)
 
 	for _, t := range reg.All() {
 		name := t.Name()

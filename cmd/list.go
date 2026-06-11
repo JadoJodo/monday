@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/JadoJodo/monday/internal/registry"
-	"github.com/JadoJodo/monday/internal/ui"
+	"github.com/JadoJodo/rundown/internal/registry"
+	"github.com/JadoJodo/rundown/internal/ui"
 )
 
 func newListCmd(gf *globalFlags) *cobra.Command {

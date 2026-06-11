@@ -2,8 +2,8 @@
 package rustup
 
 import (
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/task"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/task"
 )
 
 // New returns the rustup task. Dry-run checks for toolchain updates

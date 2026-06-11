@@ -3,8 +3,8 @@ package notify
 import (
 	"context"
 
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/exec"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/exec"
 )
 
 // macOSScript is run via `osascript -e <script> <title> <body>`. Title and body

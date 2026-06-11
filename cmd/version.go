@@ -11,7 +11,7 @@ func newVersionCmd() *cobra.Command {
 		Use:   "version",
 		Short: "Print version information",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			fmt.Fprintf(cmd.OutOrStdout(), "monday %s (commit %s)\n", version, commit)
+			fmt.Fprintf(cmd.OutOrStdout(), "rundown %s (commit %s)\n", version, commit)
 			return nil
 		},
 	}

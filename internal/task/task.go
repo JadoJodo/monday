@@ -6,8 +6,8 @@ package task
 import (
 	"context"
 
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/exec"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/exec"
 )
 
 // Options carries per-run settings into a Task.
@@ -34,7 +34,7 @@ type Result struct {
 type Task interface {
 	// Name is the stable identifier used in config and the CLI (e.g. "npm").
 	Name() string
-	// Description is a short human-readable summary shown in `monday list`.
+	// Description is a short human-readable summary shown in `rundown list`.
 	Description() string
 	// Enabled reports whether the task is turned on for the given config.
 	Enabled(cfg config.Config) bool

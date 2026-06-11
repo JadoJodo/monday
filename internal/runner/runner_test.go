@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/registry"
-	"github.com/JadoJodo/monday/internal/task"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/registry"
+	"github.com/JadoJodo/rundown/internal/task"
 )
 
 // fakeTask is a controllable Task for runner tests.

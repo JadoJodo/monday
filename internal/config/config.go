@@ -1,5 +1,5 @@
-// Package config defines the on-disk configuration for monday and how it is
-// loaded from ~/.monday.yaml. A missing file yields sensible defaults (all
+// Package config defines the on-disk configuration for rundown and how it is
+// loaded from ~/.rundown.yaml. A missing file yields sensible defaults (all
 // built-in tasks enabled, one weekly profile scheduled for Monday).
 package config
 
@@ -14,7 +14,7 @@ import (
 )
 
 // FileName is the default config file name within the user's home directory.
-const FileName = ".monday.yaml"
+const FileName = ".rundown.yaml"
 
 // TaskConfig holds settings common to a simple toggleable task.
 type TaskConfig struct {
@@ -41,7 +41,7 @@ type CleanupConfig struct {
 	// Mode string `yaml:"mode"`
 }
 
-// Profile is a named bundle of tasks scheduled on one or more weekdays. monday
+// Profile is a named bundle of tasks scheduled on one or more weekdays. rundown
 // decides which profiles are due on a given day from these.
 type Profile struct {
 	// Days lists the weekday names (e.g. "monday") this profile runs on.
@@ -65,7 +65,7 @@ type NtfyConfig struct {
 	Priority string `yaml:"priority"`
 }
 
-// NotifyConfig controls how monday reports a run's outcome headlessly.
+// NotifyConfig controls how rundown reports a run's outcome headlessly.
 type NotifyConfig struct {
 	// OnSuccess sends notifications even when every task succeeds. Failures
 	// always notify regardless.
@@ -129,7 +129,7 @@ func Default() Config {
 			Ntfy: NtfyConfig{
 				Enabled:  false,
 				Server:   "https://ntfy.sh",
-				Topic:    "my-monday",
+				Topic:    "my-rundown",
 				Priority: "default",
 			},
 		},
@@ -175,7 +175,7 @@ func Exists(path string) (bool, error) {
 // default weekly profile rather than merging into it.
 //
 // A file using the old "schedule:" schema is rejected with guidance toward
-// `monday config init` — there is no automatic migration.
+// `rundown config init` — there is no automatic migration.
 func Load(path string) (Config, error) {
 	cfg := Default()
 	data, err := os.ReadFile(path)
@@ -196,7 +196,7 @@ func Load(path string) (Config, error) {
 	_, hasSchedule := raw["schedule"]
 	_, hasProfiles := raw["profiles"]
 	if hasSchedule && !hasProfiles {
-		return cfg, errors.New(`config uses the old schema; run "monday config init" to regenerate (your file is preserved until you overwrite it)`)
+		return cfg, errors.New(`config uses the old schema; run "rundown config init" to regenerate (your file is preserved until you overwrite it)`)
 	}
 	if hasProfiles {
 		cfg.Profiles = nil
@@ -214,16 +214,16 @@ func (c Config) Marshal() ([]byte, error) {
 }
 
 // Sample returns an annotated example configuration suitable for writing to a
-// fresh ~/.monday.yaml via `monday config init`.
+// fresh ~/.rundown.yaml via `rundown config init`.
 func Sample() []byte {
 	return []byte(sampleYAML)
 }
 
-const sampleYAML = `# monday configuration (~/.monday.yaml)
-# Run "monday --help" for usage.
+const sampleYAML = `# rundown configuration (~/.rundown.yaml)
+# Run "rundown --help" for usage.
 
-# Profiles bundle tasks onto weekdays. monday decides which profiles are due
-# each day; the launchd agent triggers daily and lets monday choose.
+# Profiles bundle tasks onto weekdays. rundown decides which profiles are due
+# each day; the launchd agent triggers daily and lets rundown choose.
 profiles:
   weekly:
     days: [monday]
@@ -283,6 +283,6 @@ notify:
   ntfy:
     enabled: false
     server: https://ntfy.sh
-    topic: my-monday
+    topic: my-rundown
     priority: default  # min|low|default|high|urgent (bumped to high on failure)
 `

@@ -1,4 +1,4 @@
-// Package ui renders monday's output with lipgloss. Functions operate on
+// Package ui renders rundown's output with lipgloss. Functions operate on
 // primitive types (task results, registry data) so the package stays decoupled
 // from the runner and command layers. Color is automatically disabled when
 // output is not a terminal (lipgloss honors NO_COLOR and TTY detection).
@@ -10,10 +10,10 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/registry"
-	"github.com/JadoJodo/monday/internal/schedule"
-	"github.com/JadoJodo/monday/internal/task"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/registry"
+	"github.com/JadoJodo/rundown/internal/schedule"
+	"github.com/JadoJodo/rundown/internal/task"
 )
 
 var (

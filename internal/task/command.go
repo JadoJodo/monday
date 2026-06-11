@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/JadoJodo/monday/internal/config"
+	"github.com/JadoJodo/rundown/internal/config"
 )
 
 // CommandSpec describes a task that runs a single external command, with one

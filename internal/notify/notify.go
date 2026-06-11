@@ -1,4 +1,4 @@
-// Package notify delivers a run's summary headlessly so monday is useful when
+// Package notify delivers a run's summary headlessly so rundown is useful when
 // invoked by launchd with no terminal attached. Failures always notify; clean
 // runs notify only when notify.on_success is set.
 package notify
@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/exec"
-	"github.com/JadoJodo/monday/internal/runner"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/exec"
+	"github.com/JadoJodo/rundown/internal/runner"
 )
 
 // Message is a delivery-agnostic notification payload.
@@ -63,9 +63,9 @@ func Dispatch(ctx context.Context, cfg config.Config, msg Message, notifiers ...
 // FromSummary builds a Message from a completed run.
 func FromSummary(sum runner.Summary) Message {
 	ok, _, failed := sum.Counts()
-	title := fmt.Sprintf("monday: %d ok", ok)
+	title := fmt.Sprintf("rundown: %d ok", ok)
 	if failed > 0 {
-		title = fmt.Sprintf("monday: %d failed", failed)
+		title = fmt.Sprintf("rundown: %d failed", failed)
 	}
 
 	lines := make([]string, 0, len(sum.Results))

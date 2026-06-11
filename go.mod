@@ -1,4 +1,4 @@
-module github.com/JadoJodo/monday
+module github.com/JadoJodo/rundown
 
 go 1.26.3
 

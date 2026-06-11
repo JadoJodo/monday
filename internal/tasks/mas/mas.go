@@ -2,8 +2,8 @@
 package mas
 
 import (
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/task"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/task"
 )
 
 // New returns the mas task. Dry-run lists outdated apps (`mas outdated`); apply

@@ -10,14 +10,14 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/registry"
-	"github.com/JadoJodo/monday/internal/ui"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/registry"
+	"github.com/JadoJodo/rundown/internal/ui"
 )
 
 var promptStyle = lipgloss.NewStyle().Bold(true)
 
-// doDefault backs the bare `monday` command. It is purely informational and
+// doDefault backs the bare `rundown` command. It is purely informational and
 // NEVER executes tasks: when unconfigured it runs first-run onboarding, and
 // when configured it prints the module status plus a hint to run maintenance.
 func doDefault(cmd *cobra.Command, gf *globalFlags) error {
@@ -39,12 +39,12 @@ func doDefault(cmd *cobra.Command, gf *globalFlags) error {
 	}
 	out := cmd.OutOrStdout()
 	fmt.Fprintln(out, ui.List(registry.Default(), cfg))
-	fmt.Fprintln(out, "\nRun `monday run` to perform maintenance.")
+	fmt.Fprintln(out, "\nRun `rundown run` to perform maintenance.")
 	return nil
 }
 
 // showModules lists the available maintenance modules and their default
-// enabled state, reusing the same renderer as `monday list`.
+// enabled state, reusing the same renderer as `rundown list`.
 func showModules(out io.Writer) {
 	fmt.Fprintln(out, ui.List(registry.Default(), config.Default()))
 }
@@ -78,7 +78,7 @@ func onboard(cmd *cobra.Command, path string) error {
 	showModules(out)
 
 	if !interactive() {
-		fmt.Fprintf(out, "\nNo configuration found at %s.\nRun `monday config init` to create one, then `monday run` to perform maintenance.\n", path)
+		fmt.Fprintf(out, "\nNo configuration found at %s.\nRun `rundown config init` to create one, then `rundown run` to perform maintenance.\n", path)
 		return nil
 	}
 
@@ -87,12 +87,12 @@ func onboard(cmd *cobra.Command, path string) error {
 		return err
 	}
 	if !create {
-		fmt.Fprintln(out, "\nNo configuration written. Run `monday config init` later to create one.")
+		fmt.Fprintln(out, "\nNo configuration written. Run `rundown config init` later to create one.")
 		return nil
 	}
 	if err := os.WriteFile(path, config.Sample(), 0o644); err != nil {
 		return err
 	}
-	fmt.Fprintf(out, "\nWrote %s\nReview it, then run `monday run` to perform maintenance.\n", path)
+	fmt.Fprintf(out, "\nWrote %s\nReview it, then run `rundown run` to perform maintenance.\n", path)
 	return nil
 }

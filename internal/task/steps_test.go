@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JadoJodo/monday/internal/config"
-	"github.com/JadoJodo/monday/internal/exec"
+	"github.com/JadoJodo/rundown/internal/config"
+	"github.com/JadoJodo/rundown/internal/exec"
 )
 
 func stepsSpec() StepsSpec {

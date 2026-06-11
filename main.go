@@ -1,11 +1,11 @@
-// Command monday automates routine macOS maintenance.
+// Command rundown automates routine macOS maintenance.
 package main
 
 import (
 	"context"
 	"os"
 
-	"github.com/JadoJodo/monday/cmd"
+	"github.com/JadoJodo/rundown/cmd"
 )
 
 func main() {
