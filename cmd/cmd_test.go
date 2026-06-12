@@ -109,25 +109,39 @@ func TestRunUnconfiguredRefuses(t *testing.T) {
 	_ = out
 }
 
-// TestDefaultUnconfiguredShowsModules verifies bare `rundown` with no config is
-// informational: it lists modules, points at `config init`, exits 0, and never
-// runs or writes anything.
-func TestDefaultUnconfiguredShowsModules(t *testing.T) {
+// TestDefaultUnconfiguredPrintsGuidance verifies bare `rundown` with no config
+// on a non-interactive terminal (as in tests / under launchd) prints guidance
+// toward `config init`, exits 0, and never runs or writes anything. On an
+// interactive terminal this branch instead launches the config TUI, which is
+// not unit-tested (huh needs a real PTY).
+func TestDefaultUnconfiguredPrintsGuidance(t *testing.T) {
 	cfg := filepath.Join(t.TempDir(), "rundown.yaml")
 	out, err := run(t, "--config", cfg)
 	if err != nil {
 		t.Fatalf("bare rundown with no config should exit 0: %v", err)
-	}
-	for _, name := range []string{"softwareupdate", "mas", "brew", "npm", "pipx", "rustup", "mise", "custom", "cleanup", "health"} {
-		if !strings.Contains(out, name) {
-			t.Errorf("output missing module %q in %q", name, out)
-		}
 	}
 	if !strings.Contains(out, "config init") {
 		t.Errorf("output should hint at `config init`: %q", out)
 	}
 	if _, statErr := os.Stat(cfg); !os.IsNotExist(statErr) {
 		t.Errorf("bare rundown must not create a config file, but %s exists", cfg)
+	}
+}
+
+// TestConfigNoSubcommandNonTTY verifies `rundown config` (no subcommand) on a
+// non-interactive terminal refuses with guidance and writes nothing, rather
+// than launching the huh TUI (which would hang without a PTY).
+func TestConfigNoSubcommandNonTTY(t *testing.T) {
+	cfg := filepath.Join(t.TempDir(), "rundown.yaml")
+	out, err := run(t, "--config", cfg, "config")
+	if err == nil {
+		t.Fatalf("`config` with no subcommand on non-TTY should error, got output %q", out)
+	}
+	if !strings.Contains(err.Error(), "config init") || !strings.Contains(err.Error(), "config show") {
+		t.Errorf("error should point at `config init`/`config show`: %v", err)
+	}
+	if _, statErr := os.Stat(cfg); !os.IsNotExist(statErr) {
+		t.Errorf("`config` must not create a config file, but %s exists", cfg)
 	}
 }
 

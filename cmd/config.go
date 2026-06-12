@@ -16,6 +16,31 @@ func newConfigCmd(gf *globalFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config",
 		Short: "Manage the rundown configuration file",
+		Long: "Manage the rundown configuration file.\n\n" +
+			"Running `rundown config` with no subcommand launches an interactive " +
+			"editor to choose which tasks are enabled and add custom scripts, " +
+			"creating the file if it does not exist or editing it in place if it " +
+			"does. It never runs maintenance.",
+		SilenceUsage:  true,
+		SilenceErrors: true,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			path, err := resolvePath(gf)
+			if err != nil {
+				return err
+			}
+			if !interactive() {
+				return fmt.Errorf("`rundown config` needs an interactive terminal; run `rundown config init` to write a starter config or `rundown config show` to print the current one")
+			}
+			base := config.Default()
+			if ok, _ := config.Exists(path); ok {
+				loaded, err := config.Load(path)
+				if err != nil {
+					return err
+				}
+				base = loaded
+			}
+			return launchConfigTUI(cmd, path, base)
+		},
 	}
 	cmd.AddCommand(newConfigInitCmd(gf), newConfigPathCmd(gf), newConfigShowCmd(gf))
 	return cmd
