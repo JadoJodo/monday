@@ -136,6 +136,134 @@ func Default() Config {
 	}
 }
 
+// ToggleableTaskNames returns the built-in task names that the config TUI
+// presents as checkboxes: every task in AllTaskNames except "custom", which is
+// driven by whether any user scripts are supplied rather than a checkbox.
+func ToggleableTaskNames() []string {
+	names := make([]string, 0, len(AllTaskNames)-1)
+	for _, name := range AllTaskNames {
+		if name == "custom" {
+			continue
+		}
+		names = append(names, name)
+	}
+	return names
+}
+
+// taskEnabled reports whether the named toggleable task is currently enabled.
+func (c Config) taskEnabled(name string) bool {
+	switch name {
+	case "softwareupdate":
+		return c.Tasks.SoftwareUpdate.Enabled
+	case "mas":
+		return c.Tasks.Mas.Enabled
+	case "brew":
+		return c.Tasks.Brew.Enabled
+	case "npm":
+		return c.Tasks.Npm.Enabled
+	case "pipx":
+		return c.Tasks.Pipx.Enabled
+	case "rustup":
+		return c.Tasks.Rustup.Enabled
+	case "mise":
+		return c.Tasks.Mise.Enabled
+	case "cleanup":
+		return c.Tasks.Cleanup.Enabled
+	case "health":
+		return c.Tasks.Health.Enabled
+	default:
+		return false
+	}
+}
+
+// EnabledTaskNames returns the currently-enabled toggleable task names in
+// AllTaskNames order. It is used to pre-check the multiselect when editing an
+// existing config. "custom" is excluded (see ToggleableTaskNames).
+func (c Config) EnabledTaskNames() []string {
+	names := make([]string, 0, len(AllTaskNames))
+	for _, name := range ToggleableTaskNames() {
+		if c.taskEnabled(name) {
+			names = append(names, name)
+		}
+	}
+	return names
+}
+
+// Apply returns base with the task selection applied: each toggleable task's
+// Enabled flag is set to whether its name appears in selected; the custom task's
+// Scripts are replaced wholesale, and its Enabled flag is preserved from base,
+// forced on when the user adds new scripts and forced off when no scripts remain;
+// and the "weekly" profile's Tasks are rebuilt to the enabled names in
+// AllTaskNames order (preserving its Days, defaulting to ["monday"] if base has
+// none) only when base already contains a "weekly" profile. Notify and any other
+// profiles are inherited from base unchanged. base is not mutated.
+func (base Config) Apply(selected []string, scripts []Script) Config {
+	sel := make(map[string]bool, len(selected))
+	for _, name := range selected {
+		sel[name] = true
+	}
+
+	cfg := base
+	cfg.Tasks.SoftwareUpdate.Enabled = sel["softwareupdate"]
+	cfg.Tasks.Mas.Enabled = sel["mas"]
+	cfg.Tasks.Brew.Enabled = sel["brew"]
+	cfg.Tasks.Npm.Enabled = sel["npm"]
+	cfg.Tasks.Pipx.Enabled = sel["pipx"]
+	cfg.Tasks.Rustup.Enabled = sel["rustup"]
+	cfg.Tasks.Mise.Enabled = sel["mise"]
+	cfg.Tasks.Cleanup.Enabled = sel["cleanup"]
+	cfg.Tasks.Health.Enabled = sel["health"]
+
+	// Preserve the existing custom-enabled state. The TUI has no checkbox to toggle
+	// custom and only ever appends scripts, so: keep base's flag, enable when the
+	// user adds new scripts, and disable when there are none to run.
+	customEnabled := base.Tasks.Custom.Enabled
+	if len(scripts) > len(base.Tasks.Custom.Scripts) {
+		customEnabled = true
+	}
+	if len(scripts) == 0 {
+		customEnabled = false
+	}
+	copied := make([]Script, len(scripts))
+	copy(copied, scripts)
+	cfg.Tasks.Custom = CustomConfig{Enabled: customEnabled, Scripts: copied}
+
+	// Rebuild the weekly profile's task list to the enabled names in registry
+	// order. custom is included iff it has scripts.
+	weeklyTasks := make([]string, 0, len(AllTaskNames))
+	for _, name := range AllTaskNames {
+		if name == "custom" {
+			if customEnabled {
+				weeklyTasks = append(weeklyTasks, name)
+			}
+			continue
+		}
+		if sel[name] {
+			weeklyTasks = append(weeklyTasks, name)
+		}
+	}
+
+	// Deep-copy the profiles map so base is not mutated.
+	profiles := make(map[string]Profile, len(base.Profiles)+1)
+	for name, p := range base.Profiles {
+		profiles[name] = p
+	}
+	// Manage the weekly profile only when it already exists. The create flow seeds
+	// one via Default(); a config with only custom profiles is left untouched so a
+	// no-op save can't inject a Monday schedule the user never defined.
+	if existing, ok := base.Profiles["weekly"]; ok {
+		days := []string{"monday"}
+		if len(existing.Days) > 0 {
+			days = make([]string, len(existing.Days))
+			copy(days, existing.Days)
+		}
+		profiles["weekly"] = Profile{Days: days, Tasks: weeklyTasks}
+	}
+	cfg.Profiles = profiles
+
+	return cfg
+}
+
 // ProfileNames returns the configured profile names in sorted order.
 func (c Config) ProfileNames() []string {
 	names := make([]string, 0, len(c.Profiles))
